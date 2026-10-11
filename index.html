@@ -52,6 +52,13 @@
           </button>
           <div class="topbar-title" id="topbar-title">Vexa</div>
           <div class="topbar-right">
+            <label class="model-picker" for="model-select">
+              <span>Model</span>
+              <select id="model-select" aria-label="Select model">
+                <option value="bloom-1.0">Bloom 1.0</option>
+                <option value="bloom-1.0-instruct">Bloom 1.0 Instruct</option>
+              </select>
+            </label>
             <span class="privacy-note" title="Conversation history is stored in this browser">Saved in this browser</span>
             <button class="icon-button topbar-about" id="about-button-top" type="button" aria-label="About Vexa">?</button>
           </div>
@@ -92,9 +99,15 @@
             <label class="sr-only" for="message-input">Message Vexa</label>
             <textarea id="message-input" rows="1" maxlength="1000" placeholder="Message Vexa" autocomplete="off"></textarea>
             <div class="composer-bottom">
-              <span class="composer-note">Vexa can make mistakes. Check important information.</span>
+              <div class="effort-control" title="Higher settings allow a longer generated response.">
+                <div class="effort-heading"><label for="effort-range">Effort</label><output id="effort-value" for="effort-range">Medium</output></div>
+                <input id="effort-range" type="range" min="0" max="3" step="1" value="1" aria-label="Effort" aria-describedby="effort-description">
+                <span class="sr-only" id="effort-description">Controls the response token budget for Bloom 1.0.</span>
+                <div class="effort-stops" aria-hidden="true"><span>Low</span><span>Medium</span><span>High</span><span>Extra high</span></div>
+              </div>
               <div class="composer-actions"><span class="char-count" id="char-count">0 / 1000</span><button class="send-button" id="send-button" type="submit" aria-label="Send message"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5.5 9 10 4.5 14.5 9"/></svg></button></div>
             </div>
+            <span class="composer-note">Vexa can make mistakes. Check important information.</span>
           </form>
         </footer>
       </main>

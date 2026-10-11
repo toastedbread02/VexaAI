@@ -1,7 +1,15 @@
 (() => {
   const HISTORY_KEY = 'vexa.web.conversations.v1';
+  const MODEL_KEY = 'vexa.web.model.v1';
+  const EFFORT_KEY = 'vexa.web.effort.v1';
   const MAX_HISTORY = 24;
   const MIN_THINK_MS = 3000;
+  const EFFORT_LEVELS = [
+    { id: 'low', label: 'Low' },
+    { id: 'medium', label: 'Medium' },
+    { id: 'high', label: 'High' },
+    { id: 'extra-high', label: 'Extra high' },
+  ];
   const $ = (selector) => document.querySelector(selector);
   const elements = {
     sidebar: $('#sidebar'),
@@ -12,6 +20,7 @@
     list: $('#conversation-list'),
     count: $('#history-count'),
     title: $('#topbar-title'),
+    modelSelect: $('#model-select'),
     connectionStatus: $('#connection-status'),
     connectionDot: $('#connection-dot'),
     welcome: $('#welcome'),
@@ -20,6 +29,8 @@
     thinkingCaption: $('#thinking-caption'),
     form: $('#composer'),
     input: $('#message-input'),
+    effortRange: $('#effort-range'),
+    effortValue: $('#effort-value'),
     send: $('#send-button'),
     charCount: $('#char-count'),
     toast: $('#toast'),
@@ -205,19 +216,60 @@
     elements.send.disabled = isThinking || !elements.input.value.trim();
   }
 
+  function selectedEffort() {
+    return EFFORT_LEVELS[Number(elements.effortRange.value)] || EFFORT_LEVELS[1];
+  }
+
+  function updateEffortControl() {
+    const index = Number(elements.effortRange.value);
+    const effort = selectedEffort();
+    elements.effortValue.value = effort.label;
+    elements.effortValue.textContent = effort.label;
+    elements.effortRange.setAttribute('aria-valuetext', effort.label);
+    elements.effortRange.style.setProperty('--range-progress', `${(index / (EFFORT_LEVELS.length - 1)) * 100}%`);
+    return effort.id;
+  }
+
+  async function loadAvailableModels() {
+    try {
+      const response = await fetch('/models', { cache: 'no-store' });
+      if (!response.ok) return;
+      const catalog = await response.json();
+      if (!Array.isArray(catalog.models) || catalog.models.length === 0) return;
+
+      let storedModel = null;
+      try { storedModel = localStorage.getItem(MODEL_KEY); } catch { /* Use the server default. */ }
+      const modelIds = new Set(catalog.models.map((item) => item.id));
+      const selectedModel = modelIds.has(storedModel) ? storedModel
+        : modelIds.has(catalog.default_model) ? catalog.default_model
+          : catalog.models[0].id;
+      elements.modelSelect.replaceChildren(...catalog.models.map((item) => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.name;
+        return option;
+      }));
+      elements.modelSelect.value = selectedModel;
+    } catch {
+      // Keep the built-in choices when the page is being previewed without an API.
+    }
+  }
+
+  function setConnectionState(online) {
+    const label = online ? 'Local server connected' : 'Server unavailable';
+    elements.connectionStatus.textContent = label;
+    elements.connectionDot.classList.toggle('offline', !online);
+    elements.connectionDot.title = label;
+    elements.connectionDot.setAttribute('aria-label', label);
+  }
+
   async function checkConnection() {
     try {
       const response = await fetch('/status', { cache: 'no-store' });
       if (!response.ok || !(await response.json()).online) throw new Error('Vexa server is unavailable');
-      elements.connectionStatus.textContent = 'Local server connected';
-      elements.connectionDot.classList.remove('offline');
-      elements.connectionDot.title = 'Local server connected';
-      elements.connectionDot.setAttribute('aria-label', 'Local server connected');
+      setConnectionState(true);
     } catch {
-      elements.connectionStatus.textContent = 'Preview · no chat server';
-      elements.connectionDot.classList.add('offline');
-      elements.connectionDot.title = 'Chat server not connected';
-      elements.connectionDot.setAttribute('aria-label', 'Chat server not connected');
+      setConnectionState(false);
     }
   }
 
@@ -268,7 +320,14 @@
     const request = fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, max_tokens: 80, temperature: 0.8, top_k: 30, top_p: 0.92 }),
+      body: JSON.stringify({
+        message: text,
+        model: elements.modelSelect.value,
+        effort: selectedEffort().id,
+        temperature: 0.8,
+        top_k: 30,
+        top_p: 0.92,
+      }),
     }).then(async (response) => {
       if (!response.ok) throw new Error(`Vexa returned ${response.status}.`);
       return response.json();
@@ -280,17 +339,18 @@
 
     let assistantMessage;
     if (result.status === 'fulfilled' && typeof result.value.response === 'string') {
+      setConnectionState(true);
       assistantMessage = {
         role: 'assistant', text: result.value.response,
         source: result.value.source === 'local' ? 'local' : 'model', createdAt: Date.now(),
       };
     } else {
+      setConnectionState(false);
       assistantMessage = {
         role: 'assistant',
-        text: 'The site is open, but Vexa’s chat server is not connected. Run the local Vexa server or connect a hosted chat backend, then try again.',
-        source: 'local', createdAt: Date.now(),
+        text: 'Oops! it seems like the server is down, please retry later.',
+        createdAt: Date.now(),
       };
-      showToast(result.status === 'rejected' ? result.reason.message : 'The local server returned an empty response.');
     }
     // The active thread may have changed while the request was pending only if
     // another browser action bypasses the disabled composer, so update by id.
@@ -330,6 +390,13 @@
     });
   });
   elements.input.addEventListener('input', updateComposer);
+  elements.effortRange.addEventListener('input', updateEffortControl);
+  elements.effortRange.addEventListener('change', () => {
+    try { localStorage.setItem(EFFORT_KEY, selectedEffort().id); } catch { /* Preference remains for this page. */ }
+  });
+  elements.modelSelect.addEventListener('change', () => {
+    try { localStorage.setItem(MODEL_KEY, elements.modelSelect.value); } catch { /* Preference remains for this page. */ }
+  });
   elements.input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
@@ -368,5 +435,11 @@
     renderHistory();
   }
   updateComposer();
+  let savedEffort = null;
+  try { savedEffort = localStorage.getItem(EFFORT_KEY); } catch { /* Use Medium by default. */ }
+  const effortIndex = EFFORT_LEVELS.findIndex((level) => level.id === savedEffort);
+  if (effortIndex >= 0) elements.effortRange.value = String(effortIndex);
+  updateEffortControl();
+  loadAvailableModels();
   checkConnection();
 })();
