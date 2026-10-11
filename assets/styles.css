@@ -100,6 +100,12 @@ kbd { padding: 3px 5px; border: 1px solid #34445f; border-radius: 5px; color: #8
 .tool-button { display: inline-flex; align-items: center; gap: 5px; padding: 4px 5px; border: 0; border-radius: 5px; background: transparent; color: #929292; font-size: 9px; cursor: pointer; }
 .tool-button:hover { background: #23324b; color: #eee; }
 .tool-button svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.3; }
+.error-notice { display: flex; width: min(100%, 620px); align-items: flex-start; gap: 12px; padding: 14px 16px; border: 1px solid #713d4a; border-radius: 10px; background: #2b1b29; color: #f4dfe3; animation: appear .18s ease-out both; }
+.error-notice-icon { display: grid; width: 24px; height: 24px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: rgba(225, 98, 117, .13); color: #f08a98; }
+.error-notice-icon svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
+.error-notice-copy { min-width: 0; }
+.error-notice-copy strong { display: block; margin: 1px 0 4px; color: #ffdbe0; font-size: 12px; font-weight: 600; }
+.error-notice-copy p { margin: 0; color: #e5c5cb; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
 .thinking-card { display: none; width: fit-content; align-items: center; gap: 10px; margin: 0 0 12px 39px; padding: 5px 0; }
 .thinking-card.visible { display: flex; animation: appear .18s ease-out both; }
 .thinking-mark { display: flex; width: 22px; height: 22px; align-items: center; justify-content: center; gap: 3px; }

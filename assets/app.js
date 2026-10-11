@@ -174,6 +174,28 @@
     if (scroll) requestAnimationFrame(() => row.scrollIntoView({ block: 'end', behavior: 'smooth' }));
   }
 
+  function appendErrorNotice({ scroll = false } = {}) {
+    const notice = document.createElement('section');
+    notice.className = 'error-notice';
+    notice.setAttribute('role', 'alert');
+
+    const icon = document.createElement('span');
+    icon.className = 'error-notice-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.innerHTML = '<svg viewBox="0 0 20 20"><path d="M10 2.5 18 17H2z"/><path d="M10 7v4.5M10 14.5h.01"/></svg>';
+
+    const copy = document.createElement('div');
+    copy.className = 'error-notice-copy';
+    const title = document.createElement('strong');
+    title.textContent = 'Connection error';
+    const description = document.createElement('p');
+    description.textContent = 'Oops! it seems like the server is down, please retry later.';
+    copy.append(title, description);
+    notice.append(icon, copy);
+    elements.messages.append(notice);
+    if (scroll) requestAnimationFrame(() => notice.scrollIntoView({ block: 'end', behavior: 'smooth' }));
+  }
+
   function renderConversation(conversation) {
     elements.messages.replaceChildren();
     const hasMessages = Boolean(conversation?.messages?.length);
@@ -337,7 +359,7 @@
     isThinking = false;
     setThinking(false);
 
-    let assistantMessage;
+    let assistantMessage = null;
     if (result.status === 'fulfilled' && typeof result.value.response === 'string') {
       setConnectionState(true);
       assistantMessage = {
@@ -346,22 +368,18 @@
       };
     } else {
       setConnectionState(false);
-      assistantMessage = {
-        role: 'assistant',
-        text: 'Oops! it seems like the server is down, please retry later.',
-        createdAt: Date.now(),
-      };
     }
     // The active thread may have changed while the request was pending only if
     // another browser action bypasses the disabled composer, so update by id.
     const savedConversation = conversations.find((item) => item.id === conversation.id);
-    if (savedConversation) {
+    if (savedConversation && assistantMessage) {
       savedConversation.messages.push(assistantMessage);
       savedConversation.updatedAt = Date.now();
       saveConversations();
     }
     if (activeId === conversation.id) {
-      appendMessage(assistantMessage, { scroll: true });
+      if (assistantMessage) appendMessage(assistantMessage, { scroll: true });
+      else appendErrorNotice({ scroll: true });
       renderHistory();
       elements.input.focus({ preventScroll: true });
     }
