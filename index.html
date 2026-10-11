@@ -94,12 +94,23 @@
             <div class="composer-bottom">
               <span class="char-count" id="char-count">0 / 1000</span>
               <div class="composer-actions">
-                <details class="model-control" id="model-control">
-                  <summary class="model-trigger" id="model-menu-trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="model-menu">
+                <div class="model-control" id="model-control">
+                  <button class="model-trigger" id="model-menu-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="model-menu">
                     <span id="model-trigger-label">Bloom 1.0</span>
                     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
-                  </summary>
-                  <section class="model-menu" id="model-menu" role="dialog" aria-label="Model and effort settings">
+                  </button>
+                  <section class="model-menu" id="model-menu" role="dialog" aria-label="Model and effort settings" hidden>
+                    <div class="effort-control">
+                      <div class="effort-heading">
+                        <div><label for="effort-range">Choose effort</label><span>Response length</span></div>
+                        <output id="effort-value" for="effort-range">Medium</output>
+                      </div>
+                      <input id="effort-range" type="range" min="0" max="100" step="1" value="33" aria-label="Effort" aria-describedby="effort-description">
+                      <span class="sr-only" id="effort-description">Controls how many tokens Bloom generates in its response.</span>
+                      <div class="effort-stops" aria-hidden="true"><span>Low</span><span>Medium</span><span>High</span><span>Extra high</span></div>
+                      <p class="effort-hint">Higher effort allows a longer response.</p>
+                    </div>
+                    <div class="model-menu-divider"></div>
                     <label class="model-select-label" for="model-select">Model</label>
                     <div class="model-select-wrap">
                       <select id="model-select" aria-label="Select model">
@@ -108,23 +119,8 @@
                       </select>
                       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
                     </div>
-                    <div class="model-menu-divider"></div>
-                    <div class="effort-control">
-                      <div class="effort-heading">
-                        <div><label for="effort-range">Choose effort</label><span>Adjust the response token budget</span></div>
-                        <output id="effort-value" for="effort-range">Medium</output>
-                      </div>
-                      <input id="effort-range" type="range" min="0" max="100" step="1" value="33" aria-label="Effort" aria-describedby="effort-description">
-                      <span class="sr-only" id="effort-description">Controls how many tokens Bloom generates in its response.</span>
-                      <div class="effort-stops" aria-hidden="true">
-                        <span data-effort-index="0"><b>Low</b><small>40 tokens</small></span>
-                        <span data-effort-index="1"><b>Medium</b><small>80 tokens</small></span>
-                        <span data-effort-index="2"><b>High</b><small>128 tokens</small></span>
-                        <span data-effort-index="3"><b>Extra high</b><small>192 tokens</small></span>
-                      </div>
-                    </div>
                   </section>
-                </details>
+                </div>
                 <button class="send-button" id="send-button" type="submit" aria-label="Send message"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5.5 9 10 4.5 14.5 9"/></svg></button>
               </div>
             </div>

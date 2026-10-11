@@ -22,6 +22,7 @@
     title: $('#topbar-title'),
     modelSelect: $('#model-select'),
     modelControl: $('#model-control'),
+    modelMenu: $('#model-menu'),
     modelTrigger: $('#model-menu-trigger'),
     modelTriggerLabel: $('#model-trigger-label'),
     connectionStatus: $('#connection-status'),
@@ -34,7 +35,6 @@
     input: $('#message-input'),
     effortRange: $('#effort-range'),
     effortValue: $('#effort-value'),
-    effortStops: document.querySelectorAll('[data-effort-index]'),
     send: $('#send-button'),
     charCount: $('#char-count'),
     toast: $('#toast'),
@@ -250,26 +250,22 @@
   function updateEffortControl() {
     const progress = Number(elements.effortRange.value);
     const effort = selectedEffort();
-    const selectedIndex = EFFORT_LEVELS.indexOf(effort);
     elements.effortValue.value = effort.label;
     elements.effortValue.textContent = effort.label;
     elements.effortRange.setAttribute('aria-valuetext', effort.label);
     elements.effortRange.style.setProperty('--range-progress', `${progress}%`);
-    elements.effortStops.forEach((stop) => {
-      stop.classList.toggle('active', Number(stop.dataset.effortIndex) === selectedIndex);
-    });
     return effort.id;
   }
 
   function updateModelTriggerLabel() {
-    const open = elements.modelControl.open;
-    elements.modelTriggerLabel.textContent = open ? 'Choose effort' : (elements.modelSelect.selectedOptions[0]?.textContent || 'Bloom 1.0');
-    elements.modelTrigger.setAttribute('aria-expanded', String(open));
+    elements.modelTriggerLabel.textContent = elements.modelSelect.selectedOptions[0]?.textContent || 'Bloom 1.0';
   }
 
   function setModelMenuOpen(open) {
-    elements.modelControl.open = open;
-    updateModelTriggerLabel();
+    elements.modelMenu.hidden = !open;
+    elements.modelTrigger.setAttribute('aria-expanded', String(open));
+    elements.modelTriggerLabel.textContent = open ? 'Choose effort' : (elements.modelSelect.selectedOptions[0]?.textContent || 'Bloom 1.0');
+    if (open) requestAnimationFrame(() => elements.effortRange.focus({ preventScroll: true }));
   }
 
   async function loadAvailableModels() {
@@ -440,12 +436,12 @@
     try { localStorage.setItem(MODEL_KEY, elements.modelSelect.value); } catch { /* Preference remains for this page. */ }
     updateModelTriggerLabel();
   });
-  elements.modelControl.addEventListener('toggle', updateModelTriggerLabel);
+  elements.modelTrigger.addEventListener('click', () => setModelMenuOpen(elements.modelMenu.hidden));
   document.addEventListener('click', (event) => {
-    if (elements.modelControl.open && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
+    if (!elements.modelMenu.hidden && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
   });
   document.addEventListener('focusin', (event) => {
-    if (elements.modelControl.open && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
+    if (!elements.modelMenu.hidden && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
   });
   elements.input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -475,7 +471,7 @@
       startNewConversation();
     }
     if (event.key === 'Escape') closeMobileMenu();
-    if (event.key === 'Escape' && elements.modelControl.open) {
+    if (event.key === 'Escape' && !elements.modelMenu.hidden) {
       setModelMenuOpen(false);
       elements.modelTrigger.focus({ preventScroll: true });
     }
