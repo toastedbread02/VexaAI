@@ -7,6 +7,7 @@
     sidebar: $('#sidebar'),
     backdrop: $('#sidebar-backdrop'),
     mobileMenu: $('#mobile-menu'),
+    mobileMenuOpen: $('#mobile-menu-open'),
     newChat: $('#new-chat'),
     list: $('#conversation-list'),
     count: $('#history-count'),
@@ -23,6 +24,7 @@
     charCount: $('#char-count'),
     toast: $('#toast'),
     about: $('#about-dialog'),
+    aboutButtonTop: $('#about-button-top'),
   };
 
   let conversations = loadConversations();
@@ -112,10 +114,15 @@
   function appendMessage(message, { scroll = false } = {}) {
     const row = document.createElement('article');
     row.className = `message-row ${message.role === 'user' ? 'user' : 'assistant'}`;
-    const avatar = document.createElement('span');
+    const avatar = document.createElement(message.role === 'assistant' ? 'img' : 'span');
     avatar.className = 'message-avatar';
     avatar.setAttribute('aria-hidden', 'true');
-    avatar.textContent = message.role === 'user' ? 'Y' : 'V';
+    if (message.role === 'assistant') {
+      avatar.src = 'assets/vexa-mark.svg';
+      avatar.alt = '';
+    } else {
+      avatar.textContent = 'Y';
+    }
 
     const content = document.createElement('div');
     content.className = 'message-content';
@@ -314,12 +321,14 @@
     elements.sidebar.classList.add('open');
     elements.backdrop.classList.add('visible');
     elements.mobileMenu.setAttribute('aria-expanded', 'true');
+    elements.mobileMenuOpen.setAttribute('aria-expanded', 'true');
   }
 
   function closeMobileMenu() {
     elements.sidebar.classList.remove('open');
     elements.backdrop.classList.remove('visible');
     elements.mobileMenu.setAttribute('aria-expanded', 'false');
+    elements.mobileMenuOpen.setAttribute('aria-expanded', 'false');
   }
 
   elements.form.addEventListener('submit', (event) => {
@@ -341,11 +350,13 @@
   elements.mobileMenu.addEventListener('click', () => {
     if (elements.sidebar.classList.contains('open')) closeMobileMenu(); else openMobileMenu();
   });
+  elements.mobileMenuOpen.addEventListener('click', openMobileMenu);
   elements.backdrop.addEventListener('click', closeMobileMenu);
   document.querySelectorAll('.suggestion-card').forEach((card) => {
     card.addEventListener('click', () => sendMessage(card.dataset.prompt).catch((error) => showToast(error.message)));
   });
   $('#about-button').addEventListener('click', () => elements.about.showModal());
+  elements.aboutButtonTop.addEventListener('click', () => elements.about.showModal());
   $('#dialog-close').addEventListener('click', () => elements.about.close());
   $('#dialog-done').addEventListener('click', () => elements.about.close());
   elements.about.addEventListener('click', (event) => {
