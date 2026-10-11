@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#080a10">
+    <meta name="description" content="A quiet space to explore ideas with Vexa, an experimental local language model.">
+    <title>Vexa — a space to wonder</title>
+    <link rel="icon" href="assets/vexa-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="assets/app.js" defer></script>
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <div class="app-frame">
+      <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+        <a class="brand" href="/" aria-label="Vexa home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none"><path d="M8 11.5 18.6 31h3.1L32 11.5h-5.3l-6.6 12.8-6.8-12.8H8Z" fill="currentColor"/><circle cx="31.5" cy="9" r="3.5" fill="#A5F2D4"/></svg>
+          </span>
+          <span class="brand-name">vexa<span class="brand-ai">ai</span></span>
+        </a>
+
+        <button class="new-chat-button" id="new-chat" type="button">
+          <span class="plus-icon" aria-hidden="true">+</span>
+          <span>New conversation</span>
+          <kbd>⌘ K</kbd>
+        </button>
+
+        <div class="sidebar-label-row">
+          <span class="sidebar-label">YOUR SPACE</span>
+          <span class="history-count" id="history-count">0</span>
+        </div>
+        <nav class="conversation-list" id="conversation-list" aria-label="Recent conversations"></nav>
+        <div class="sidebar-spacer"></div>
+
+        <div class="sidebar-note">
+          <span class="note-orb" aria-hidden="true"></span>
+          <div><strong>A small model, a big curiosity.</strong><p>Vexa is an experiment that grows with every conversation.</p></div>
+        </div>
+        <div class="sidebar-footer">
+          <span class="model-avatar" aria-hidden="true">V</span>
+          <div class="footer-copy"><strong>Vexa Bloom 1.0</strong><span id="connection-status">Checking local server…</span></div>
+          <span class="online-dot" id="connection-dot" title="Checking server" aria-label="Checking server"></span>
+        </div>
+      </aside>
+      <button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Close menu"></button>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobile-menu" type="button" aria-label="Open menu" aria-expanded="false">
+            <span></span><span></span>
+          </button>
+          <div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-slash">/</span><strong id="topbar-title">New conversation</strong></div>
+          <div class="topbar-right">
+            <span class="private-badge"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 6.5V5a3.5 3.5 0 0 1 7 0v1.5M3.5 6.5h9v7h-9v-7Z"/></svg>Saved in this browser</span>
+            <button class="about-button" id="about-button" type="button" aria-label="About Vexa">?</button>
+          </div>
+        </header>
+
+        <section class="conversation-stage" id="conversation-stage" aria-label="Conversation">
+          <div class="welcome" id="welcome">
+            <div class="welcome-kicker"><span class="kicker-line"></span> AN EXPERIMENTAL AI <span class="kicker-line"></span></div>
+            <div class="hero-emblem" aria-hidden="true">
+              <div class="emblem-ring ring-outer"></div><div class="emblem-ring ring-inner"></div>
+              <div class="emblem-core"><svg viewBox="0 0 48 48" fill="none"><path d="M8 13 21 37h4l13-24h-6.5L23 29 14.5 13H8Z" fill="currentColor"/><circle cx="37" cy="10" r="4" fill="#A5F2D4"/></svg></div>
+              <span class="orbit orbit-a"></span><span class="orbit orbit-b"></span>
+            </div>
+            <h1>A little curiosity<br>goes a <span>long way.</span></h1>
+            <p class="welcome-copy">A space to ask, explore, and see where an idea takes you.<br>What’s on your mind?</p>
+
+            <div class="suggestion-grid" aria-label="Try asking">
+              <button class="suggestion-card" type="button" data-prompt="What does a CPU do?">
+                <span class="suggestion-icon icon-mint"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4M9 10h6v4H9z"/></svg></span>
+                <span><strong>Everyday tech</strong><small>What does a CPU do?</small></span><span class="card-arrow">↗</span>
+              </button>
+              <button class="suggestion-card" type="button" data-prompt="What is the capital of Switzerland?">
+                <span class="suggestion-icon icon-blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg></span>
+                <span><strong>Explore the world</strong><small>Capital of Switzerland?</small></span><span class="card-arrow">↗</span>
+              </button>
+              <button class="suggestion-card" type="button" data-prompt="Explain how a transformer works in simple terms.">
+                <span class="suggestion-icon icon-violet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18m-8-9h16M5.6 5.6l12.8 12.8m0-12.8L5.6 18.4"/><circle cx="12" cy="12" r="8.5"/></svg></span>
+                <span><strong>Big ideas, simply</strong><small>How does a transformer work?</small></span><span class="card-arrow">↗</span>
+              </button>
+              <button class="suggestion-card" type="button" data-prompt="What is 29 + 1?">
+                <span class="suggestion-icon icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="9"/></svg></span>
+                <span><strong>Quick calculations</strong><small>What is 29 + 1?</small></span><span class="card-arrow">↗</span>
+              </button>
+            </div>
+            <div class="welcome-footnote"><span class="sparkle">✳</span> Thoughtful questions welcome. Vexa is still learning.</div>
+          </div>
+
+          <div class="messages" id="messages" aria-live="polite" aria-relevant="additions text"></div>
+          <div class="thinking-card" id="thinking" aria-live="polite" aria-hidden="true">
+            <span class="thinking-mark"><span></span><span></span><span></span></span>
+            <span class="thinking-copy"><strong>Thinking<span class="thinking-ellipsis"><i>.</i><i>.</i><i>.</i></span></strong><small id="thinking-caption">Finding the right words</small></span>
+            <span class="thinking-sheen" aria-hidden="true"></span>
+          </div>
+        </section>
+
+        <footer class="composer-wrap">
+          <form class="composer" id="composer">
+            <label class="sr-only" for="message-input">Message Vexa</label>
+            <textarea id="message-input" rows="1" maxlength="1000" placeholder="Ask Vexa anything…" autocomplete="off"></textarea>
+            <div class="composer-bottom">
+              <div class="composer-hint"><span class="hint-sparkle">✳</span><span>Curiosity looks good on you.</span><kbd>↵</kbd><span>to send</span></div>
+              <div class="composer-actions"><span class="char-count" id="char-count">0 / 1000</span><button class="send-button" id="send-button" type="submit" aria-label="Send message"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5.5 9 10 4.5 14.5 9"/></svg></button></div>
+            </div>
+          </form>
+          <p class="disclaimer">Vexa is an experimental model. Double-check important information.</p>
+        </footer>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <dialog class="about-dialog" id="about-dialog">
+      <button class="dialog-close" id="dialog-close" type="button" aria-label="Close">×</button>
+      <div class="dialog-mark">V</div>
+      <p class="dialog-eyebrow">A NOTE ABOUT VEXA</p>
+      <h2>Curious by design.<br><span>Still becoming.</span></h2>
+      <p>Vexa is a small, experimental language model designed to run locally. It can answer some known questions, but open-ended responses may be inaccurate or surprising.</p>
+      <div class="dialog-private"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 6.5V5a3.5 3.5 0 0 1 7 0v1.5M3.5 6.5h9v7h-9v-7Z"/></svg>Your chat history stays in this browser.</div>
+      <button class="dialog-done" id="dialog-done" type="button">Got it</button>
+    </dialog>
+  </body>
+</html>
