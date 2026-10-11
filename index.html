@@ -116,11 +116,11 @@
                       </div>
                       <input id="effort-range" type="range" min="0" max="100" step="1" value="33" aria-label="Effort" aria-describedby="effort-description">
                       <span class="sr-only" id="effort-description">Controls how many tokens Bloom generates in its response.</span>
-                      <div class="effort-stops" aria-hidden="true">
-                        <span data-effort-index="0"><b>Low</b><small>40 tokens</small></span>
-                        <span data-effort-index="1"><b>Medium</b><small>80 tokens</small></span>
-                        <span data-effort-index="2"><b>High</b><small>128 tokens</small></span>
-                        <span data-effort-index="3"><b>Extra high</b><small>192 tokens</small></span>
+                      <div class="effort-stops" role="group" aria-label="Effort presets">
+                        <button type="button" data-effort-index="0" aria-pressed="false"><b>Low</b><small>40 tokens</small></button>
+                        <button type="button" data-effort-index="1" aria-pressed="false"><b>Medium</b><small>80 tokens</small></button>
+                        <button type="button" data-effort-index="2" aria-pressed="false"><b>High</b><small>128 tokens</small></button>
+                        <button type="button" data-effort-index="3" aria-pressed="false"><b>Extra high</b><small>192 tokens</small></button>
                       </div>
                     </div>
                   </section>
