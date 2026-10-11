@@ -21,6 +21,10 @@
     count: $('#history-count'),
     title: $('#topbar-title'),
     modelSelect: $('#model-select'),
+    modelControl: $('#model-control'),
+    modelMenu: $('#model-menu'),
+    modelTrigger: $('#model-menu-trigger'),
+    modelTriggerLabel: $('#model-trigger-label'),
     connectionStatus: $('#connection-status'),
     connectionDot: $('#connection-dot'),
     welcome: $('#welcome'),
@@ -239,17 +243,29 @@
   }
 
   function selectedEffort() {
-    return EFFORT_LEVELS[Number(elements.effortRange.value)] || EFFORT_LEVELS[1];
+    const index = Math.round((Number(elements.effortRange.value) / 100) * (EFFORT_LEVELS.length - 1));
+    return EFFORT_LEVELS[index] || EFFORT_LEVELS[1];
   }
 
   function updateEffortControl() {
-    const index = Number(elements.effortRange.value);
+    const progress = Number(elements.effortRange.value);
     const effort = selectedEffort();
     elements.effortValue.value = effort.label;
     elements.effortValue.textContent = effort.label;
     elements.effortRange.setAttribute('aria-valuetext', effort.label);
-    elements.effortRange.style.setProperty('--range-progress', `${(index / (EFFORT_LEVELS.length - 1)) * 100}%`);
+    elements.effortRange.style.setProperty('--range-progress', `${progress}%`);
     return effort.id;
+  }
+
+  function updateModelTriggerLabel() {
+    elements.modelTriggerLabel.textContent = elements.modelSelect.selectedOptions[0]?.textContent || 'Bloom 1.0';
+  }
+
+  function setModelMenuOpen(open) {
+    elements.modelMenu.hidden = !open;
+    elements.modelTrigger.setAttribute('aria-expanded', String(open));
+    elements.modelTriggerLabel.textContent = open ? 'Choose effort' : (elements.modelSelect.selectedOptions[0]?.textContent || 'Bloom 1.0');
+    if (open) requestAnimationFrame(() => elements.effortRange.focus({ preventScroll: true }));
   }
 
   async function loadAvailableModels() {
@@ -272,6 +288,7 @@
         return option;
       }));
       elements.modelSelect.value = selectedModel;
+      updateModelTriggerLabel();
     } catch {
       // Keep the built-in choices when the page is being previewed without an API.
     }
@@ -410,10 +427,21 @@
   elements.input.addEventListener('input', updateComposer);
   elements.effortRange.addEventListener('input', updateEffortControl);
   elements.effortRange.addEventListener('change', () => {
+    const index = EFFORT_LEVELS.indexOf(selectedEffort());
+    elements.effortRange.value = String(Math.round((index / (EFFORT_LEVELS.length - 1)) * 100));
+    updateEffortControl();
     try { localStorage.setItem(EFFORT_KEY, selectedEffort().id); } catch { /* Preference remains for this page. */ }
   });
   elements.modelSelect.addEventListener('change', () => {
     try { localStorage.setItem(MODEL_KEY, elements.modelSelect.value); } catch { /* Preference remains for this page. */ }
+    updateModelTriggerLabel();
+  });
+  elements.modelTrigger.addEventListener('click', () => setModelMenuOpen(elements.modelMenu.hidden));
+  document.addEventListener('click', (event) => {
+    if (!elements.modelMenu.hidden && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
+  });
+  document.addEventListener('focusin', (event) => {
+    if (!elements.modelMenu.hidden && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
   });
   elements.input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -443,6 +471,10 @@
       startNewConversation();
     }
     if (event.key === 'Escape') closeMobileMenu();
+    if (event.key === 'Escape' && !elements.modelMenu.hidden) {
+      setModelMenuOpen(false);
+      elements.modelTrigger.focus({ preventScroll: true });
+    }
   });
 
   const latest = [...conversations].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
@@ -456,8 +488,9 @@
   let savedEffort = null;
   try { savedEffort = localStorage.getItem(EFFORT_KEY); } catch { /* Use Medium by default. */ }
   const effortIndex = EFFORT_LEVELS.findIndex((level) => level.id === savedEffort);
-  if (effortIndex >= 0) elements.effortRange.value = String(effortIndex);
+  if (effortIndex >= 0) elements.effortRange.value = String(Math.round((effortIndex / (EFFORT_LEVELS.length - 1)) * 100));
   updateEffortControl();
+  updateModelTriggerLabel();
   loadAvailableModels();
   checkConnection();
 })();
