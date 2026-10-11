@@ -22,7 +22,6 @@
     title: $('#topbar-title'),
     modelSelect: $('#model-select'),
     modelControl: $('#model-control'),
-    modelMenu: $('#model-menu'),
     modelTrigger: $('#model-menu-trigger'),
     modelTriggerLabel: $('#model-trigger-label'),
     connectionStatus: $('#connection-status'),
@@ -258,14 +257,14 @@
   }
 
   function updateModelTriggerLabel() {
-    elements.modelTriggerLabel.textContent = elements.modelSelect.selectedOptions[0]?.textContent || 'Bloom 1.0';
+    const open = elements.modelControl.open;
+    elements.modelTriggerLabel.textContent = open ? 'Choose effort' : (elements.modelSelect.selectedOptions[0]?.textContent || 'Bloom 1.0');
+    elements.modelTrigger.setAttribute('aria-expanded', String(open));
   }
 
   function setModelMenuOpen(open) {
-    elements.modelMenu.hidden = !open;
-    elements.modelTrigger.setAttribute('aria-expanded', String(open));
-    elements.modelTriggerLabel.textContent = open ? 'Choose effort' : (elements.modelSelect.selectedOptions[0]?.textContent || 'Bloom 1.0');
-    if (open) requestAnimationFrame(() => elements.effortRange.focus({ preventScroll: true }));
+    elements.modelControl.open = open;
+    updateModelTriggerLabel();
   }
 
   async function loadAvailableModels() {
@@ -436,12 +435,12 @@
     try { localStorage.setItem(MODEL_KEY, elements.modelSelect.value); } catch { /* Preference remains for this page. */ }
     updateModelTriggerLabel();
   });
-  elements.modelTrigger.addEventListener('click', () => setModelMenuOpen(elements.modelMenu.hidden));
+  elements.modelControl.addEventListener('toggle', updateModelTriggerLabel);
   document.addEventListener('click', (event) => {
-    if (!elements.modelMenu.hidden && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
+    if (elements.modelControl.open && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
   });
   document.addEventListener('focusin', (event) => {
-    if (!elements.modelMenu.hidden && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
+    if (elements.modelControl.open && !elements.modelControl.contains(event.target)) setModelMenuOpen(false);
   });
   elements.input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -471,7 +470,7 @@
       startNewConversation();
     }
     if (event.key === 'Escape') closeMobileMenu();
-    if (event.key === 'Escape' && !elements.modelMenu.hidden) {
+    if (event.key === 'Escape' && elements.modelControl.open) {
       setModelMenuOpen(false);
       elements.modelTrigger.focus({ preventScroll: true });
     }
