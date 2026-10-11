@@ -1,8 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
-  <rect width="160" height="160" rx="28" fill="#101a2c"/>
-  <path d="M34 36 80 112M126 36l-46 76" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="16"/>
-  <circle cx="34" cy="34" r="13" fill="#fff"/>
-  <circle cx="126" cy="34" r="13" fill="#fff"/>
-  <circle cx="80" cy="116" r="17" fill="#101a2c" stroke="#32a9dc" stroke-width="9"/>
-  <circle cx="80" cy="116" r="6" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="145 240 700 620" role="img" aria-label="Vexa V mark">
+  <g fill="none" stroke="#fff" stroke-width="85" stroke-linecap="butt">
+    <path d="M219 315 491 773"/>
+    <path d="M763 315 491 773"/>
+  </g>
+  <g fill="#fff">
+    <circle cx="219" cy="315" r="69"/>
+    <circle cx="763" cy="315" r="69"/>
+  </g>
+  <circle cx="491" cy="773" r="82" fill="#2da9dc"/>
+  <circle cx="491" cy="773" r="38" fill="#fff"/>
 </svg>

@@ -38,7 +38,6 @@
             <span id="connection-status">Checking Vexa…</span>
           </div>
           <div class="model-row">
-            <img src="assets/vexa-mark.svg" alt="" class="model-mark">
             <span><strong>Vexa</strong><small>Experimental model</small></span>
             <button class="icon-button about-button" id="about-button" type="button" aria-label="About Vexa">···</button>
           </div>
@@ -60,7 +59,6 @@
 
         <section class="conversation-stage" id="conversation-stage" aria-label="Conversation">
           <div class="welcome" id="welcome">
-            <img src="assets/vexa-mark.svg" alt="" class="welcome-mark">
             <h1>What can I help with?</h1>
             <div class="suggestion-grid" aria-label="Try a prompt">
               <button class="suggestion-card" type="button" data-prompt="What does a CPU do?">
@@ -84,7 +82,7 @@
 
           <div class="messages" id="messages" aria-live="polite" aria-relevant="additions text"></div>
           <div class="thinking-card" id="thinking" aria-live="polite" aria-hidden="true">
-            <img src="assets/vexa-mark.svg" alt="" class="thinking-mark">
+            <span class="thinking-mark" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="thinking-copy"><strong>Thinking<span class="thinking-ellipsis"><i>.</i><i>.</i><i>.</i></span></strong><small id="thinking-caption">Finding the right words</small></span>
           </div>
         </section>
@@ -105,7 +103,6 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <dialog class="about-dialog" id="about-dialog">
       <button class="dialog-close" id="dialog-close" type="button" aria-label="Close">×</button>
-      <img src="assets/vexa-mark.svg" alt="" class="dialog-mark">
       <h2>About Vexa</h2>
       <p>Vexa is an experimental language model designed to run locally. It can answer some known questions, but open-ended responses may be inaccurate.</p>
       <p class="dialog-private">Conversation history is stored in this browser.</p>

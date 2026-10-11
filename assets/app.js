@@ -114,16 +114,6 @@
   function appendMessage(message, { scroll = false } = {}) {
     const row = document.createElement('article');
     row.className = `message-row ${message.role === 'user' ? 'user' : 'assistant'}`;
-    const avatar = document.createElement(message.role === 'assistant' ? 'img' : 'span');
-    avatar.className = 'message-avatar';
-    avatar.setAttribute('aria-hidden', 'true');
-    if (message.role === 'assistant') {
-      avatar.src = 'assets/vexa-mark.svg';
-      avatar.alt = '';
-    } else {
-      avatar.textContent = 'Y';
-    }
-
     const content = document.createElement('div');
     content.className = 'message-content';
     const meta = document.createElement('div');
@@ -168,7 +158,7 @@
       content.append(tools);
     }
 
-    row.append(avatar, content);
+    row.append(content);
     elements.messages.append(row);
     if (scroll) requestAnimationFrame(() => row.scrollIntoView({ block: 'end', behavior: 'smooth' }));
   }
