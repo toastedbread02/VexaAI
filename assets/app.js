@@ -4,6 +4,7 @@
   const EFFORT_KEY = 'vexa.web.effort.v1';
   const MAX_HISTORY = 24;
   const MIN_THINK_MS = 3000;
+  const API_BASE = String(window.VEXA_API_BASE || '').trim();
   const EFFORT_LEVELS = [
     { id: 'low', label: 'Low' },
     { id: 'medium', label: 'Medium' },
@@ -11,6 +12,19 @@
     { id: 'extra-high', label: 'Extra high' },
   ];
   const $ = (selector) => document.querySelector(selector);
+  function apiUrl(path) {
+    if (!API_BASE) return path;
+    const base = new URL(API_BASE);
+    const isLocal = ['localhost', '127.0.0.1', '[::1]'].includes(base.hostname);
+    if (base.protocol !== 'https:' && !(base.protocol === 'http:' && isLocal)) {
+      throw new Error('The Vexa API address must use HTTPS.');
+    }
+    if (base.username || base.password || base.search || base.hash) {
+      throw new Error('Set VEXA_API_BASE to the server root URL, without credentials or query parameters.');
+    }
+    return new URL(path, base.origin).href;
+  }
+
   const elements = {
     sidebar: $('#sidebar'),
     backdrop: $('#sidebar-backdrop'),
@@ -178,7 +192,7 @@
     if (scroll) requestAnimationFrame(() => row.scrollIntoView({ block: 'end', behavior: 'smooth' }));
   }
 
-  function appendErrorNotice({ scroll = false } = {}) {
+  function appendErrorNotice({ scroll = false, message = 'Oops! it seems like the server is down, please retry later.', title: heading = 'Connection error' } = {}) {
     const notice = document.createElement('section');
     notice.className = 'error-notice';
     notice.setAttribute('role', 'alert');
@@ -191,9 +205,9 @@
     const copy = document.createElement('div');
     copy.className = 'error-notice-copy';
     const title = document.createElement('strong');
-    title.textContent = 'Connection error';
+    title.textContent = heading;
     const description = document.createElement('p');
-    description.textContent = 'Oops! it seems like the server is down, please retry later.';
+    description.textContent = message;
     copy.append(title, description);
     notice.append(icon, copy);
     elements.messages.append(notice);
@@ -270,7 +284,7 @@
 
   async function loadAvailableModels() {
     try {
-      const response = await fetch('/models', { cache: 'no-store' });
+      const response = await fetch(apiUrl('/models'), { cache: 'no-store' });
       if (!response.ok) return;
       const catalog = await response.json();
       if (!Array.isArray(catalog.models) || catalog.models.length === 0) return;
@@ -304,7 +318,7 @@
 
   async function checkConnection() {
     try {
-      const response = await fetch('/status', { cache: 'no-store' });
+      const response = await fetch(apiUrl('/status'), { cache: 'no-store' });
       if (!response.ok || !(await response.json()).online) throw new Error('Vexa server is unavailable');
       setConnectionState(true);
     } catch {
@@ -356,7 +370,7 @@
       setThinkingCaption(Math.floor((performance.now() - startedAt) / 950));
     }, 900);
 
-    const request = fetch('/chat', {
+    const request = fetch(apiUrl('/chat'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -368,7 +382,12 @@
         top_p: 0.92,
       }),
     }).then(async (response) => {
-      if (!response.ok) throw new Error(`Vexa returned ${response.status}.`);
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        const error = new Error(body.detail || `Vexa returned ${response.status}.`);
+        error.status = response.status;
+        throw error;
+      }
       return response.json();
     });
     const [result] = await Promise.allSettled([request, delay(Math.max(0, MIN_THINK_MS - (performance.now() - startedAt)))]);
@@ -384,7 +403,7 @@
         source: result.value.source === 'local' ? 'local' : 'model', createdAt: Date.now(),
       };
     } else {
-      setConnectionState(false);
+      setConnectionState(Boolean(result.reason?.status && result.reason.status < 500));
     }
     // The active thread may have changed while the request was pending only if
     // another browser action bypasses the disabled composer, so update by id.
@@ -396,7 +415,14 @@
     }
     if (activeId === conversation.id) {
       if (assistantMessage) appendMessage(assistantMessage, { scroll: true });
-      else appendErrorNotice({ scroll: true });
+      else {
+        const requestError = result.reason?.status && result.reason.status < 500;
+        appendErrorNotice({
+          scroll: true,
+          message: requestError ? result.reason.message : undefined,
+          title: requestError ? 'Request error' : undefined,
+        });
+      }
       renderHistory();
       elements.input.focus({ preventScroll: true });
     }
