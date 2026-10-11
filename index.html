@@ -111,16 +111,16 @@
                     <div class="model-menu-divider"></div>
                     <div class="effort-control">
                       <div class="effort-heading">
-                        <div><label for="effort-range">Reasoning effort</label></div>
+                        <div><label for="effort-range">Choose effort</label><span>Adjust the response token budget</span></div>
                         <output id="effort-value" for="effort-range">Medium</output>
                       </div>
-                      <input id="effort-range" type="range" min="0" max="3" step="1" value="1" aria-label="Reasoning effort" aria-describedby="effort-description">
-                      <span class="sr-only" id="effort-description">Choose low, medium, high, or extra high effort.</span>
+                      <input id="effort-range" type="range" min="0" max="100" step="1" value="33" aria-label="Effort" aria-describedby="effort-description">
+                      <span class="sr-only" id="effort-description">Controls how many tokens Bloom generates in its response.</span>
                       <div class="effort-stops" aria-hidden="true">
-                        <span data-effort-index="0">Low</span>
-                        <span data-effort-index="1">Medium</span>
-                        <span data-effort-index="2">High</span>
-                        <span data-effort-index="3">Extra high</span>
+                        <span data-effort-index="0"><b>Low</b><small>40 tokens</small></span>
+                        <span data-effort-index="1"><b>Medium</b><small>80 tokens</small></span>
+                        <span data-effort-index="2"><b>High</b><small>128 tokens</small></span>
+                        <span data-effort-index="3"><b>Extra high</b><small>192 tokens</small></span>
                       </div>
                     </div>
                   </section>

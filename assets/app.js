@@ -243,35 +243,22 @@
   }
 
   function selectedEffort() {
-    const index = Number(elements.effortRange.value);
+    const index = Math.round((Number(elements.effortRange.value) / 100) * (EFFORT_LEVELS.length - 1));
     return EFFORT_LEVELS[index] || EFFORT_LEVELS[1];
   }
 
-  function snapEffortControl() {
-    const lastIndex = EFFORT_LEVELS.length - 1;
-    const index = Math.min(lastIndex, Math.max(0, Math.round(Number(elements.effortRange.value))));
-    elements.effortRange.value = String(index);
-    updateEffortControl();
-  }
-
   function updateEffortControl() {
-    const selectedIndex = Number(elements.effortRange.value);
-    const effort = EFFORT_LEVELS[selectedIndex] || EFFORT_LEVELS[1];
+    const progress = Number(elements.effortRange.value);
+    const effort = selectedEffort();
+    const selectedIndex = EFFORT_LEVELS.indexOf(effort);
     elements.effortValue.value = effort.label;
     elements.effortValue.textContent = effort.label;
     elements.effortRange.setAttribute('aria-valuetext', effort.label);
-    elements.effortRange.style.setProperty('--range-progress', `${(selectedIndex / (EFFORT_LEVELS.length - 1)) * 100}%`);
+    elements.effortRange.style.setProperty('--range-progress', `${progress}%`);
     elements.effortStops.forEach((stop) => {
-      const active = Number(stop.dataset.effortIndex) === selectedIndex;
-      stop.classList.toggle('active', active);
+      stop.classList.toggle('active', Number(stop.dataset.effortIndex) === selectedIndex);
     });
     return effort.id;
-  }
-
-  function saveEffortPreference() {
-    try {
-      localStorage.setItem(EFFORT_KEY, selectedEffort().id);
-    } catch { /* Preference remains for this page. */ }
   }
 
   function updateModelTriggerLabel() {
@@ -442,10 +429,12 @@
     });
   });
   elements.input.addEventListener('input', updateComposer);
-  elements.effortRange.addEventListener('input', snapEffortControl);
+  elements.effortRange.addEventListener('input', updateEffortControl);
   elements.effortRange.addEventListener('change', () => {
-    snapEffortControl();
-    saveEffortPreference();
+    const index = EFFORT_LEVELS.indexOf(selectedEffort());
+    elements.effortRange.value = String(Math.round((index / (EFFORT_LEVELS.length - 1)) * 100));
+    updateEffortControl();
+    try { localStorage.setItem(EFFORT_KEY, selectedEffort().id); } catch { /* Preference remains for this page. */ }
   });
   elements.modelSelect.addEventListener('change', () => {
     try { localStorage.setItem(MODEL_KEY, elements.modelSelect.value); } catch { /* Preference remains for this page. */ }
@@ -501,11 +490,9 @@
   }
   updateComposer();
   let savedEffort = null;
-  try {
-    savedEffort = localStorage.getItem(EFFORT_KEY);
-  } catch { /* Use Medium by default. */ }
+  try { savedEffort = localStorage.getItem(EFFORT_KEY); } catch { /* Use Medium by default. */ }
   const effortIndex = EFFORT_LEVELS.findIndex((level) => level.id === savedEffort);
-  if (effortIndex >= 0) elements.effortRange.value = String(effortIndex);
+  if (effortIndex >= 0) elements.effortRange.value = String(Math.round((effortIndex / (EFFORT_LEVELS.length - 1)) * 100));
   updateEffortControl();
   updateModelTriggerLabel();
   loadAvailableModels();
