@@ -247,6 +247,13 @@
     return EFFORT_LEVELS[index] || EFFORT_LEVELS[1];
   }
 
+  function snapEffortControl() {
+    const lastIndex = EFFORT_LEVELS.length - 1;
+    const index = Math.min(lastIndex, Math.max(0, Math.round(Number(elements.effortRange.value))));
+    elements.effortRange.value = String(index);
+    updateEffortControl();
+  }
+
   function updateEffortControl() {
     const selectedIndex = Number(elements.effortRange.value);
     const effort = EFFORT_LEVELS[selectedIndex] || EFFORT_LEVELS[1];
@@ -435,8 +442,9 @@
     });
   });
   elements.input.addEventListener('input', updateComposer);
-  elements.effortRange.addEventListener('input', updateEffortControl);
+  elements.effortRange.addEventListener('input', snapEffortControl);
   elements.effortRange.addEventListener('change', () => {
+    snapEffortControl();
     saveEffortPreference();
   });
   elements.modelSelect.addEventListener('change', () => {
