@@ -2,7 +2,6 @@
   const HISTORY_KEY = 'vexa.web.conversations.v1';
   const MODEL_KEY = 'vexa.web.model.v1';
   const EFFORT_KEY = 'vexa.web.effort.v1';
-  const EFFORT_POSITION_KEY = 'vexa.web.effort-position.v1';
   const MAX_HISTORY = 24;
   const MIN_THINK_MS = 3000;
   const EFFORT_LEVELS = [
@@ -244,22 +243,20 @@
   }
 
   function selectedEffort() {
-    const index = Math.round((Number(elements.effortRange.value) / 100) * (EFFORT_LEVELS.length - 1));
+    const index = Number(elements.effortRange.value);
     return EFFORT_LEVELS[index] || EFFORT_LEVELS[1];
   }
 
   function updateEffortControl() {
-    const progress = Number(elements.effortRange.value);
-    const effort = selectedEffort();
-    const selectedIndex = EFFORT_LEVELS.indexOf(effort);
+    const selectedIndex = Number(elements.effortRange.value);
+    const effort = EFFORT_LEVELS[selectedIndex] || EFFORT_LEVELS[1];
     elements.effortValue.value = effort.label;
     elements.effortValue.textContent = effort.label;
     elements.effortRange.setAttribute('aria-valuetext', effort.label);
-    elements.effortRange.style.setProperty('--range-progress', `${progress}%`);
+    elements.effortRange.style.setProperty('--range-progress', `${(selectedIndex / (EFFORT_LEVELS.length - 1)) * 100}%`);
     elements.effortStops.forEach((stop) => {
       const active = Number(stop.dataset.effortIndex) === selectedIndex;
       stop.classList.toggle('active', active);
-      stop.setAttribute('aria-pressed', String(active));
     });
     return effort.id;
   }
@@ -267,7 +264,6 @@
   function saveEffortPreference() {
     try {
       localStorage.setItem(EFFORT_KEY, selectedEffort().id);
-      localStorage.setItem(EFFORT_POSITION_KEY, elements.effortRange.value);
     } catch { /* Preference remains for this page. */ }
   }
 
@@ -443,12 +439,6 @@
   elements.effortRange.addEventListener('change', () => {
     saveEffortPreference();
   });
-  elements.effortStops.forEach((stop) => stop.addEventListener('click', () => {
-    const index = Number(stop.dataset.effortIndex);
-    elements.effortRange.value = String(Math.round((index / (EFFORT_LEVELS.length - 1)) * 100));
-    updateEffortControl();
-    saveEffortPreference();
-  }));
   elements.modelSelect.addEventListener('change', () => {
     try { localStorage.setItem(MODEL_KEY, elements.modelSelect.value); } catch { /* Preference remains for this page. */ }
     updateModelTriggerLabel();
@@ -503,18 +493,11 @@
   }
   updateComposer();
   let savedEffort = null;
-  let savedEffortPosition = null;
   try {
     savedEffort = localStorage.getItem(EFFORT_KEY);
-    savedEffortPosition = localStorage.getItem(EFFORT_POSITION_KEY);
   } catch { /* Use Medium by default. */ }
   const effortIndex = EFFORT_LEVELS.findIndex((level) => level.id === savedEffort);
-  const savedPosition = Number(savedEffortPosition);
-  if (savedEffortPosition !== null && Number.isFinite(savedPosition) && savedPosition >= 0 && savedPosition <= 100) {
-    elements.effortRange.value = String(savedPosition);
-  } else if (effortIndex >= 0) {
-    elements.effortRange.value = String(Math.round((effortIndex / (EFFORT_LEVELS.length - 1)) * 100));
-  }
+  if (effortIndex >= 0) elements.effortRange.value = String(effortIndex);
   updateEffortControl();
   updateModelTriggerLabel();
   loadAvailableModels();
