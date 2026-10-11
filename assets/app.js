@@ -34,6 +34,7 @@
     input: $('#message-input'),
     effortRange: $('#effort-range'),
     effortValue: $('#effort-value'),
+    effortStops: document.querySelectorAll('[data-effort-index]'),
     send: $('#send-button'),
     charCount: $('#char-count'),
     toast: $('#toast'),
@@ -249,10 +250,14 @@
   function updateEffortControl() {
     const progress = Number(elements.effortRange.value);
     const effort = selectedEffort();
+    const selectedIndex = EFFORT_LEVELS.indexOf(effort);
     elements.effortValue.value = effort.label;
     elements.effortValue.textContent = effort.label;
     elements.effortRange.setAttribute('aria-valuetext', effort.label);
     elements.effortRange.style.setProperty('--range-progress', `${progress}%`);
+    elements.effortStops.forEach((stop) => {
+      stop.classList.toggle('active', Number(stop.dataset.effortIndex) === selectedIndex);
+    });
     return effort.id;
   }
 
